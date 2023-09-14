@@ -1,6 +1,5 @@
 import { Box, Tab, Typography } from "@mui/material";
 import { useState } from "react";
-import DeviceTable from "./DeviceTable";
 import Tabs from "@mui/material/Tabs";
 
 interface TabPanelProps {

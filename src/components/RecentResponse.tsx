@@ -6,7 +6,7 @@ import { Typography } from '@mui/material';
 
 
 const RecentResponse = () => {
-  const [response, setResponse] = useState("No query performed");
+  const [response] = useState("No query performed");
 
   return (
     <List
