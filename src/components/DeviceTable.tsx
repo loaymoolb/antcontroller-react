@@ -7,11 +7,45 @@ import ListSubheader from '@mui/material/ListSubheader';
 import Switch from '@mui/material/Switch';
 import SettingsInputAntennaIcon from '@mui/icons-material/SettingsInputAntenna';
 import { Typography } from '@mui/material';
+import { parse } from 'toml';
+
+// const endpoint = 'http://localhost:3000'
+
+
+interface Button {
+  name: string;
+  descr: string;
+  pins: string[];
+}
+
+interface ButtonGroup {
+  buttons: Record<string, Button>;
+}
+
 
 const DeviceTable = () => {
 
+  const [buttonGroups, setButtonGroups] = useState<ButtonGroup[]>([]);
+
+  useEffect(() => {
+    fetch('/buttons.conf')
+    .then(response => response.text())
+    .then(data => {
+      const parsedData = parse(data);
+      let exampleButtons = parsedData['buttons'] as ButtonGroup[];
+      setButtonGroups(exampleButtons);
+  });
+  }, []);
+
+  console.log(buttonGroups); 
+  // use this struct instead of buttons, idk how
+  // there should be 4 categories of buttons on the page.
+  // only one button from each category can be active at a time. None can be active too.
+  // clicking a button should send a request in format `/api/BUT/<group[a-d]>/<ON/OFF>`
+  // for example `/api/BUT/a/ON` should turn on the first button from the first category   
+
   // TEMP DATA
-  const devices = [
+  const buttons = [
     {
       name: 'Antenna 1',
       description: 'REAS - a REST-API External Antenna Switch'
@@ -30,30 +64,9 @@ const DeviceTable = () => {
     },
   ]
 
-  // FETCH DATA FROM CSV
-
-    // const [devices, setDevices] = useState([]);
-
-    // useEffect(() => {
-    //   const fetchData = async () => {
-    //     try {
-    //       const response = await axios.get('/data/devices.csv');
-    //       const data = parse(response.data, {
-    //         columns: true,
-    //         skip_empty_lines: true,
-    //       });
-    //       setDevices(data);
-    //     } catch (error) {
-    //       console.error(error);
-    //     }
-    //   };
-
-    //   fetchData();
-    // }, []);
-
   const [checked, setChecked] = useState(() => {
-    const savedCheckedDevices = localStorage.getItem('checkedDevices');
-    return savedCheckedDevices ? JSON.parse(savedCheckedDevices) : [];
+    const savedCheckedButtons = localStorage.getItem('checkedButtons');
+    return savedCheckedButtons ? JSON.parse(savedCheckedButtons) : [];
   });
 
   const handleToggle = (value: string) => () => {
@@ -70,13 +83,13 @@ const DeviceTable = () => {
   };
 
   useEffect(() => {
-    localStorage.setItem('checkedDevices', JSON.stringify(checked));
+    localStorage.setItem('checkedButtons', JSON.stringify(checked));
   }, [checked]);
 
   useEffect(() => {
-    const savedCheckedDevices = localStorage.getItem('checkedDevices');
-    if (savedCheckedDevices) {
-      setChecked(JSON.parse(savedCheckedDevices));
+    const savedCheckedButtons = localStorage.getItem('checkedButtons');
+    if (savedCheckedButtons) {
+      setChecked(JSON.parse(savedCheckedButtons));
     }
   }, []);
 
@@ -93,23 +106,23 @@ const DeviceTable = () => {
               color: 'primary',
             }}
           >
-            REAS Devices
+            REAS Buttons
           </Typography>
         </ListSubheader>
       }
     >
-      {devices.map((device) => (
-        <ListItem key={device.name}>
+      {buttons.map((b) => (
+        <ListItem key={b.name}>
           <ListItemIcon>
-            <SettingsInputAntennaIcon style={{ color: checked.indexOf(device.name) !== -1 ? '#60BE84' : 'inherit' }} />
+            <SettingsInputAntennaIcon style={{ color: checked.indexOf(b.name) !== -1 ? '#60BE84' : 'inherit' }} />
           </ListItemIcon>
-          <ListItemText primary={device.name} secondary={device.description} />
+          <ListItemText primary={b.name} secondary={b.description} />
           <Switch
             edge="end"
-            onChange={handleToggle(device.name)}
-            checked={checked.indexOf(device.name) !== -1}
+            onChange={handleToggle(b.name)}
+            checked={checked.indexOf(b.name) !== -1}
             inputProps={{
-              'aria-labelledby': `switch-list-label-${device.name}`,
+              'aria-labelledby': `switch-list-label-${b.name}`,
               
             }}
             color="success"

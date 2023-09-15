@@ -22,7 +22,7 @@ const Navbar = () => {
                 color: '#fff',
               }}
             >
-              REAS API Tester
+              AntController
             </Typography>
             <Typography
               variant="h6"
@@ -32,9 +32,12 @@ const Navbar = () => {
                 color: '#fff',
               }}
             >
-              HTTP GET request generator for local devices
+              dupa
             </Typography>
           </Box>
+          <IconButton sx={{ p: 0 }}>
+            <GitHubIcon href="https://github.com/cr1tbit/REAS" sx={{  color: "#000", fontSize: {xs: "2.5rem", md: "3rem"} }} />
+          </IconButton>
           <IconButton sx={{ p: 0 }}>
             <GitHubIcon href="https://github.com/cr1tbit/REAS" sx={{  color: "#000", fontSize: {xs: "2.5rem", md: "3rem"} }} />
           </IconButton>
