@@ -10,6 +10,7 @@ import { Typography } from '@mui/material';
 import { parse } from 'toml';
 
 // const endpoint = 'http://localhost:3000'
+const api_endpoint = 'http://192.168.88.62/api'
 
 
 interface Button {
@@ -22,6 +23,24 @@ interface ButtonGroup {
   buttons: Record<string, Button>;
 }
 
+//to turn off all buttons, set bName to "OFF"
+export function activateButton(bGroup: string, bName: string): Promise<boolean> {
+  return fetch(api_endpoint + "/BUT/" + bGroup + "/" + bName,{
+    mode: 'cors'
+  })
+    .then(function(response) {
+      return response.text();
+    })
+    .then(function(result) {
+      if (result === "OK") {
+        console.log("but" + bName + "activated");
+        return true;
+      } else {
+        console.log("but" + bName + "ERR: " + result);
+        return false;
+      }
+    });
+}
 
 const DeviceTable = () => {
 
@@ -78,6 +97,8 @@ const DeviceTable = () => {
     } else {
       newChecked.splice(currentIndex, 1);
     }
+
+    activateButton('c', "EXT")
 
     setChecked(newChecked);
   };
