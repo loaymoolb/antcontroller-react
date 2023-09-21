@@ -3,11 +3,11 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import ListSubheader from '@mui/material/ListSubheader';
 import Switch from '@mui/material/Switch';
 import SettingsInputAntennaIcon from '@mui/icons-material/SettingsInputAntenna';
-import { Typography } from '@mui/material';
+import { Collapse, ListItemButton } from '@mui/material';
 import { parse } from 'toml';
+import { ExpandLess, ExpandMore } from '@mui/icons-material';
 
 // const endpoint = 'http://localhost:3000'
 
@@ -15,71 +15,64 @@ import { parse } from 'toml';
 interface Button {
   name: string;
   descr: string;
-  pins: string[];
+  pins?: string[];
 }
 
-interface ButtonGroup {
-  buttons: Record<string, Button>;
-}
-
+type ButtonGroupsType = Record<string, Button[]>;
 
 const DeviceTable = () => {
 
-  const [buttonGroups, setButtonGroups] = useState<ButtonGroup[]>([]);
+  const [buttonGroups, setButtonGroups] = useState<ButtonGroupsType>({});
+
+  
+  const groupNames = ['a', 'b', 'c', 'd'];
+  
+  const [openGroup, setOpenGroup] = useState<string | null>(null);
+  
+  const [activeButtons, setActiveButtons] = useState<Record<string, string | null>>({
+    a: null,
+    b: null,
+    c: null,
+    d: null
+  });
 
   useEffect(() => {
     fetch('/buttons.conf')
-    .then(response => response.text())
-    .then(data => {
-      const parsedData = parse(data);
-      let exampleButtons = parsedData['buttons'] as ButtonGroup[];
-      setButtonGroups(exampleButtons);
-  });
+      .then(response => response.text())
+      .then(data => {
+        const parsedData: { buttons: ButtonGroupsType } = parse(data);
+        setButtonGroups(parsedData.buttons);
+      });
   }, []);
 
-  console.log(buttonGroups); 
+  console.log(buttonGroups, "buttonGroups"); 
   // use this struct instead of buttons, idk how
   // there should be 4 categories of buttons on the page.
   // only one button from each category can be active at a time. None can be active too.
   // clicking a button should send a request in format `/api/BUT/<group[a-d]>/<ON/OFF>`
   // for example `/api/BUT/a/ON` should turn on the first button from the first category   
 
-  // TEMP DATA
-  const buttons = [
-    {
-      name: 'Antenna 1',
-      description: 'REAS - a REST-API External Antenna Switch'
-    },
-    {
-      name: 'Antenna 2',
-      description: 'REAS - a REST-API External Antenna Switch'
-    },
-    {
-      name: 'Antenna 3',
-      description: 'REAS - a REST-API External Antenna Switch'
-    },
-    {
-      name: 'Antenna 4',
-      description: 'REAS - a REST-API External Antenna Switch'
-    },
-  ]
 
-  const [checked, setChecked] = useState(() => {
+  const [checked] = useState<string[]>(() => {
     const savedCheckedButtons = localStorage.getItem('checkedButtons');
     return savedCheckedButtons ? JSON.parse(savedCheckedButtons) : [];
   });
 
-  const handleToggle = (value: string) => () => {
-    const currentIndex = checked.indexOf(value);
-    const newChecked = [...checked];
+  const handleToggle = async (category: string, buttonName: string) => {
+    const isActive = activeButtons[category] === buttonName;
+    const newState = {
+        ...activeButtons,
+        [category]: isActive ? null : buttonName
+    };
+    setActiveButtons(newState);
 
-    if (currentIndex === -1) {
-      newChecked.push(value);
-    } else {
-      newChecked.splice(currentIndex, 1);
+    const status = isActive ? 'OFF' : 'ON';
+    try {
+        await fetch(`/api/BUT/${category}/${status}`);
+        console.log(`Successfully toggled ${category} to ${status}`);
+    } catch (error) {
+        console.error("Error toggling button:", error);
     }
-
-    setChecked(newChecked);
   };
 
   useEffect(() => {
@@ -87,46 +80,51 @@ const DeviceTable = () => {
   }, [checked]);
 
   useEffect(() => {
-    const savedCheckedButtons = localStorage.getItem('checkedButtons');
-    if (savedCheckedButtons) {
-      setChecked(JSON.parse(savedCheckedButtons));
+    localStorage.setItem('activeButtons', JSON.stringify(activeButtons));
+  }, [activeButtons]);
+
+  useEffect(() => {
+    const savedActiveButtons = localStorage.getItem('activeButtons');
+    if (savedActiveButtons) {
+        setActiveButtons(JSON.parse(savedActiveButtons));
     }
   }, []);
+
+  const handleGroupToggle = (groupName: string) => {
+    setOpenGroup(openGroup === groupName ? null : groupName);
+  };
 
   return (
     <List
       sx={{ maxWidth: '100%', p: "1rem", bgcolor: '#E9EDEF', borderRadius: "20px" }}
-      subheader={
-        <ListSubheader  sx={{bgcolor: 'inherit', borderRadius: 'inherit'}}>
-          <Typography
-            variant="h6"
-            component="h6"
-            sx={{
-              fontWeight: 700,
-              color: 'primary',
-            }}
-          >
-            REAS Buttons
-          </Typography>
-        </ListSubheader>
-      }
     >
-      {buttons.map((b) => (
-        <ListItem key={b.name}>
-          <ListItemIcon>
-            <SettingsInputAntennaIcon style={{ color: checked.indexOf(b.name) !== -1 ? '#60BE84' : 'inherit' }} />
-          </ListItemIcon>
-          <ListItemText primary={b.name} secondary={b.description} />
-          <Switch
-            edge="end"
-            onChange={handleToggle(b.name)}
-            checked={checked.indexOf(b.name) !== -1}
-            inputProps={{
-              'aria-labelledby': `switch-list-label-${b.name}`,
-              
-            }}
-            color="success"
-          />
+      {groupNames.map(groupName => (
+        <ListItem key={groupName} sx={{ flexDirection: "column", justifyContent: "start", width: '100%' }}>
+          <ListItemButton onClick={() => handleGroupToggle(groupName)} sx={{ width: "100%" }}>
+            <ListItemText primary={`Group ${groupName.toUpperCase()}`} />
+            {openGroup === groupName ? <ExpandLess /> : <ExpandMore />}
+          </ListItemButton>
+          <Collapse in={openGroup === groupName} timeout="auto" unmountOnExit sx={{ width: "100%" }}>
+            <List component="div" disablePadding sx={{ flexDirection: "column" }}>
+              {buttonGroups[groupName]?.map(button => (
+                <ListItem key={button.name} sx={{ pl: 4 }}>
+                  <ListItemIcon>
+                    <SettingsInputAntennaIcon style={{ color: checked.indexOf(button.name) !== -1 ? '#60BE84' : 'inherit' }} />
+                  </ListItemIcon>
+                  <ListItemText primary={button.name} secondary={button.descr} />
+                  <Switch
+                    edge="end"
+                    onChange={() => handleToggle(groupName, button.name)}
+                    checked={activeButtons[groupName] === button.name}
+                    inputProps={{
+                      'aria-labelledby': `switch-list-label-${button.name}`,
+                    }}
+                    color="success"
+                  />
+                </ListItem>
+              ))}
+            </List>
+          </Collapse>
         </ListItem>
       ))}
     </List>

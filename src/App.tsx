@@ -2,7 +2,7 @@ import React from "react";
 import "./App.css";
 import "./controllers/guiController.js";
 import "./controllers/jsonConfigController.js";
-import Navbar from "./components/Navbar";
+// import Navbar from "./components/Navbar";
 import {
   ThemeProvider,
   createTheme,
@@ -13,7 +13,7 @@ import { Grid } from "@mui/material";
 import RecentResponse from "./components/RecentResponse";
 import Stack from "@mui/material/Stack";
 import DeviceTable from "./components/DeviceTable";
-import TabsComponent from "./components/Tabs";
+// import TabsComponent from "./components/Tabs";
 
 let theme = createTheme({
   typography: {
@@ -42,7 +42,7 @@ const App = () => {
   return (
     <ThemeProvider theme={theme}>
       <div className="App">
-        <Navbar />
+        {/* <Navbar /> */}
         <Stack sx={{ maxWidth: "1536px", mx: "auto" }}>
           <Grid
             container
@@ -56,7 +56,7 @@ const App = () => {
             }}
           >
             <Grid item xs={12} md={6}>
-              <TabsComponent />
+              {/* <TabsComponent /> */}
               <DeviceTable />
             </Grid>
             <Grid item xs={12} md={6}>
