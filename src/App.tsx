@@ -10,7 +10,7 @@ import {
 } from "@mui/material/styles";
 // import DeviceTable from "./components/DeviceTable";
 import { Grid } from "@mui/material";
-import RecentResponse from "./components/RecentResponse";
+import ConsoleLog from "./components/ConsoleLog";
 import Stack from "@mui/material/Stack";
 import DeviceTable from "./components/DeviceTable";
 // import TabsComponent from "./components/Tabs";
@@ -60,7 +60,7 @@ const App = () => {
               <DeviceTable />
             </Grid>
             <Grid item xs={12} md={6}>
-              <RecentResponse />
+              <ConsoleLog />
             </Grid>
           </Grid>
         </Stack>

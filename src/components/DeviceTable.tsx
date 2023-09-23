@@ -9,8 +9,7 @@ import { Collapse, ListItemButton } from '@mui/material';
 import { parse } from 'toml';
 import { ExpandLess, ExpandMore } from '@mui/icons-material';
 
-// const endpoint = 'http://localhost:3000'
-
+const apiEndpoint = `${process.env.REACT_APP_DEVICE_ADDR}/api`;
 
 interface Button {
   name: string;
@@ -19,14 +18,28 @@ interface Button {
 }
 
 type ButtonGroupsType = Record<string, Button[]>;
+export function activateButton(bGroup: string, bName: string): Promise<boolean> {
+  console.log(`activating ${bGroup} to ${bName}`);
+  let fetchCall = `${apiEndpoint}/BUT/${bGroup}/${bName}`
+  console.log(fetchCall)
+  return fetch(fetchCall, {mode: 'cors'})
+    .then(function(response) {
+      return response.text();
+    })
+    .then(function(result) {
+      if (result === "OK") {
+        console.log(`but ${bName} activated`);
+        return true;
+      } else {
+        console.log(`but ${bName} ERR: ${result}`);
+        return false;
+      }
+    });
+}
 
 const DeviceTable = () => {
-
-  const [buttonGroups, setButtonGroups] = useState<ButtonGroupsType>({});
-
-  
-  const groupNames = ['a', 'b', 'c', 'd'];
-  
+  const [buttonGroups, setButtonGroups] = useState<ButtonGroupsType>({});  
+  const groupNames = ['a', 'b', 'c', 'd'];  
   const [openGroup, setOpenGroup] = useState<string | null>(null);
   
   const [activeButtons, setActiveButtons] = useState<Record<string, string | null>>({
@@ -45,13 +58,7 @@ const DeviceTable = () => {
       });
   }, []);
 
-  console.log(buttonGroups, "buttonGroups"); 
-  // use this struct instead of buttons, idk how
-  // there should be 4 categories of buttons on the page.
-  // only one button from each category can be active at a time. None can be active too.
-  // clicking a button should send a request in format `/api/BUT/<group[a-d]>/<ON/OFF>`
-  // for example `/api/BUT/a/ON` should turn on the first button from the first category   
-
+  // console.log(buttonGroups, "buttonGroups"); 
 
   const [checked] = useState<string[]>(() => {
     const savedCheckedButtons = localStorage.getItem('checkedButtons');
@@ -65,11 +72,10 @@ const DeviceTable = () => {
         [category]: isActive ? null : buttonName
     };
     setActiveButtons(newState);
-
-    const status = isActive ? 'OFF' : 'ON';
+    
     try {
-        await fetch(`/api/BUT/${category}/${status}`);
-        console.log(`Successfully toggled ${category} to ${status}`);
+        const butParam = isActive ? 'OFF' : buttonName;
+        activateButton(category, butParam);
     } catch (error) {
         console.error("Error toggling button:", error);
     }
@@ -96,7 +102,7 @@ const DeviceTable = () => {
 
   return (
     <List
-      sx={{ maxWidth: '100%', p: "1rem", bgcolor: '#E9EDEF', borderRadius: "20px" }}
+      sx={{ maxWidth: '100%', bgcolor: '#E9EDEF', borderRadius: "10px" }}
     >
       {groupNames.map(groupName => (
         <ListItem key={groupName} sx={{ flexDirection: "column", justifyContent: "start", width: '100%' }}>
