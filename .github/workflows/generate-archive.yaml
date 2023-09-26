@@ -19,6 +19,10 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
+
+    - name: Install dependencies
+      run: npm install
+
     - run: ./build.sh
 
     - name: Create package for antController
