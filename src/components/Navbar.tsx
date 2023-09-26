@@ -36,10 +36,13 @@ const Navbar = () => {
             </Typography>
           </Box>
           <IconButton sx={{ p: 0 }}>
-            <GitHubIcon href="https://github.com/cr1tbit/REAS" sx={{  color: "#000", fontSize: {xs: "2.5rem", md: "3rem"} }} />
+            <GitHubIcon href="https://github.com/loaymoolb/antcontroller-react/" sx={{  color: "#6600DD", fontSize: {xs: "2.5rem", md: "3rem"} }} />
           </IconButton>
           <IconButton sx={{ p: 0 }}>
-            <GitHubIcon href="https://github.com/cr1tbit/REAS" sx={{  color: "#000", fontSize: {xs: "2.5rem", md: "3rem"} }} />
+            <GitHubIcon href="https://github.com/cr1tbit/antcontroller" sx={{  color: "#11AA11", fontSize: {xs: "2.5rem", md: "3rem"} }} />
+          </IconButton>
+          <IconButton sx={{ p: 0 }}>
+            <GitHubIcon href="https://github.com/cr1tbit/antController-fw" sx={{  color: "#0022CC", fontSize: {xs: "2.5rem", md: "3rem"} }} />
           </IconButton>
         </Toolbar>
       </Container>

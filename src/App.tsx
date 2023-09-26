@@ -1,8 +1,6 @@
-import React from "react";
+import React, { useState, useEffect } from 'react';
 import "./App.css";
-import "./controllers/guiController.js";
-import "./controllers/jsonConfigController.js";
-// import Navbar from "./components/Navbar";
+import Navbar from "./components/Navbar";
 import {
   ThemeProvider,
   createTheme,
@@ -14,6 +12,9 @@ import ConsoleLog from "./components/ConsoleLog";
 import Stack from "@mui/material/Stack";
 import DeviceTable from "./components/DeviceTable";
 // import TabsComponent from "./components/Tabs";
+import DeviceState from "./components/DeviceState";
+
+const eventsEndpoint = `${process.env.REACT_APP_DEVICE_ADDR}/events`;
 
 let theme = createTheme({
   typography: {
@@ -39,10 +40,39 @@ let theme = createTheme({
 theme = responsiveFontSizes(theme);
 
 const App = () => {
+  const [logs, setLogs] = useState<string[]>(["connecting to the device..."]);
+  const [deviceState, setDeviceState] = useState<JSON>({} as JSON);
+
+  useEffect(() => {
+    const sse = new EventSource(eventsEndpoint);
+    function getRealtimeData(data: any) {
+        console.log(`Connected!`);
+        console.log(data);
+        setLogs((prevLogs) => [...prevLogs, `Connected!`, data]);
+      } 
+    sse.onmessage = e => getRealtimeData(e.data);
+    sse.onerror = () => {
+      console.log("socket error. closing.");
+      sse.close();
+    }
+    sse.addEventListener('log', (e) => {
+      console.log(e.data);
+      setLogs((prevLogs) => [...prevLogs, e.data]);
+    });
+    sse.addEventListener('state', (e) => {
+      // console.log("New state:");
+      console.log(e.data);
+      setDeviceState(JSON.parse(e.data));
+    });
+    return () => {
+      sse.close();
+    };
+  }, []);
+
   return (
     <ThemeProvider theme={theme}>
       <div className="App">
-        {/* <Navbar /> */}
+        { <Navbar /> }
         <Stack sx={{ maxWidth: "1536px", mx: "auto" }}>
           <Grid
             container
@@ -55,12 +85,15 @@ const App = () => {
               justifyContent: "center",
             }}
           >
-            <Grid item xs={12} md={6}>
+            <Grid item xs={10} md={6}>
               {/* <TabsComponent /> */}
               <DeviceTable />
             </Grid>
-            <Grid item xs={12} md={6}>
-              <ConsoleLog />
+            <Grid item xs={10} md={5}>
+              <ConsoleLog logs={logs} />
+            </Grid>
+            <Grid item xs={2} md={1}>
+              <DeviceState stateJson={deviceState} />
             </Grid>
           </Grid>
         </Stack>
