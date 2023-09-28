@@ -12,7 +12,8 @@ import ConsoleLog from "./components/ConsoleLog";
 import Stack from "@mui/material/Stack";
 import DeviceTable from "./components/DeviceTable";
 // import TabsComponent from "./components/Tabs";
-import DeviceState from "./components/DeviceState";
+import PinState ,{PinStateIface} from "./components/PinState";
+// import { type } from 'os';
 
 const eventsEndpoint = `${process.env.REACT_APP_DEVICE_ADDR}/events`;
 
@@ -39,9 +40,75 @@ let theme = createTheme({
 });
 theme = responsiveFontSizes(theme);
 
+// export interface DeviceStateIface {
+//   io: {
+//     [key: string]: {
+//       type: string;
+//       bits: number;
+//       ioNum: number;
+//     };
+//   }[];
+//   buttons: {
+//     groups: {
+//       a: string;
+//       b: string;
+//       c: string;
+//       d: string;
+//     };
+//   };
+// }
+
+export const JSON_EXAMPLE = `{
+  "io": {
+      "MOS": {"type": "output", "bits": 32768, "ioNum": 16},
+      "REL": {"type": "output", "bits": 32767, "ioNum": 15},
+      "OPT": {"type": "output", "bits": 0, "ioNum": 8 },
+      "TTL": {"type": "output", "bits": 31, "ioNum": 8 },
+      "DUPA": {"type": "input", "bits": 69, "ioNum": 12}
+  },
+  "buttons": {
+      "groups": {
+          "a": "OFF",
+          "b": "OFF",
+          "c": "OFF",
+          "d": "OFF"
+      }
+  },
+  "msg": "OK",
+  "retCode": 200
+}`
+
+interface pinProps {
+  type: string;
+  bits: number;
+  ioNum: number;
+}
+
+function pinStateFromJSON(json: string): PinStateIface {  
+  console.log(`parsing json: ${json}`);
+  
+  let retPinState : PinStateIface = {};
+
+  const parsed = JSON.parse(json);
+  for (const [key, value] of Object.entries(parsed.io)) {
+    console.log(key);
+    let pinprops = value as pinProps;
+    retPinState[key] = {
+      ioType: pinprops.type,
+    }
+    for (let i = 0; i < pinprops.ioNum; i++) {
+      retPinState[key][i] = {
+        state: (pinprops.bits & (1 << i)) > 0
+      }
+    }
+  }
+  return retPinState;
+}
+
 const App = () => {
   const [logs, setLogs] = useState<string[]>(["connecting to the device..."]);
-  const [deviceState, setDeviceState] = useState<JSON>({} as JSON);
+  const [pinState, setPinState] = 
+    useState<PinStateIface>(pinStateFromJSON(JSON_EXAMPLE));
 
   useEffect(() => {
     const sse = new EventSource(eventsEndpoint);
@@ -60,9 +127,12 @@ const App = () => {
       setLogs((prevLogs) => [...prevLogs, e.data]);
     });
     sse.addEventListener('state', (e) => {
-      // console.log("New state:");
-      console.log(e.data);
-      setDeviceState(JSON.parse(e.data));
+      console.log("New state:");
+      try {
+        setPinState(pinStateFromJSON(e.data));
+      } catch (error) {
+        console.log(error);
+      }
     });
     return () => {
       sse.close();
@@ -93,7 +163,7 @@ const App = () => {
               <ConsoleLog logs={logs} />
             </Grid>
             <Grid item xs={2} md={1}>
-              <DeviceState stateJson={deviceState} />
+              <PinState pins={pinState} />
             </Grid>
           </Grid>
         </Stack>
