@@ -14,7 +14,7 @@ const ConsoleLog = ({ logs }: ConsoleLogProps) => {
     div.scrollTop = div.scrollHeight;
   }, [logs]);
 
-  return (    
+  return (
     <List>
       <ListItem sx={{bgcolor: '#D2DADF', borderRadius: '10px' }}>
         <div ref={terminalRef} style={{ overflow: "auto", maxHeight: "200px", fontFamily: 'monospace'}}>

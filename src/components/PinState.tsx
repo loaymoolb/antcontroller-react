@@ -5,32 +5,28 @@ import { List, ListItem } from '@mui/material';
 export interface PinStateIface {
   [tag: string]: {
     ioType: string;
-    [num: number]: {
-      state: boolean;
-    };
+    pins: {
+      [num: number]: {
+        state: boolean;
+      };
+    }
   };
 }
 
-const PinState = (pins : {pins : PinStateIface}) => {
-  const pinTabRef = useRef<HTMLDivElement>(null);
+type PinStateProps = {pins : PinStateIface};
 
-  // useEffect(() => {
-  //   const div = terminalRef.current!;
-  //   div.scrollTop = div.scrollHeight;
-  // }, [pinStatus]);
-  
-  console.log(`pinstate reveived: ${pins}`);
-
+const PinState = ({pins} : PinStateProps) => {
   return (    
-    <List>
-      
-      {/* {Object.entries(pins).map(([key, value]) => (
+    <List>      
+      {Object.entries(pins).map(([tag, content]) => (
         <ListItem sx={{ bgcolor: '#D2DADF', borderRadius: '10px' }}>
-          <h6>{key}</h6>
-          <br></br>
-          <p>{value.toString()}</p>
+        <p>{tag}</p>
+        <p>{content.ioType}</p>
+        {Object.entries(content.pins).map(([key, value]) => (
+          <p>{value.state ? "x" : "o"}</p>
+        ))}
         </ListItem>
-      ))} */}
+      ))}
     </List>
   )
 }

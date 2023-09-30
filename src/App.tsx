@@ -87,17 +87,18 @@ interface pinProps {
 function pinStateFromJSON(json: string): PinStateIface {  
   console.log(`parsing json: ${json}`);
   
-  let retPinState : PinStateIface = {};
+  const retPinState : PinStateIface = {};
 
   const parsed = JSON.parse(json);
   for (const [key, value] of Object.entries(parsed.io)) {
-    console.log(key);
-    let pinprops = value as pinProps;
+    // console.log(key);
+    const pinprops = value as pinProps;
     retPinState[key] = {
       ioType: pinprops.type,
+      pins: {}
     }
     for (let i = 0; i < pinprops.ioNum; i++) {
-      retPinState[key][i] = {
+      retPinState[key].pins[i] = {
         state: (pinprops.bits & (1 << i)) > 0
       }
     }
@@ -108,7 +109,7 @@ function pinStateFromJSON(json: string): PinStateIface {
 const App = () => {
   const [logs, setLogs] = useState<string[]>(["connecting to the device..."]);
   const [pinState, setPinState] = 
-    useState<PinStateIface>(pinStateFromJSON(JSON_EXAMPLE));
+    useState<PinStateIface>(() => pinStateFromJSON(JSON_EXAMPLE));
 
   useEffect(() => {
     const sse = new EventSource(eventsEndpoint);
@@ -127,7 +128,7 @@ const App = () => {
       setLogs((prevLogs) => [...prevLogs, e.data]);
     });
     sse.addEventListener('state', (e) => {
-      console.log("New state:");
+      // console.log("New state:");
       try {
         setPinState(pinStateFromJSON(e.data));
       } catch (error) {
