@@ -6,14 +6,11 @@ import {
   createTheme,
   responsiveFontSizes,
 } from "@mui/material/styles";
-// import DeviceTable from "./components/DeviceTable";
 import { Grid } from "@mui/material";
 import ConsoleLog from "./components/ConsoleLog";
 import Stack from "@mui/material/Stack";
 import DeviceTable from "./components/DeviceTable";
-// import TabsComponent from "./components/Tabs";
 import PinState ,{PinStateIface} from "./components/PinState";
-// import { type } from 'os';
 
 const eventsEndpoint = `${process.env.REACT_APP_DEVICE_ADDR}/events`;
 

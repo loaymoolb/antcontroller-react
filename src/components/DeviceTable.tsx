@@ -49,8 +49,15 @@ const DeviceTable = () => {
     d: null
   });
 
+  let configEndpoint: string;
+  if (process.env.REACT_APP_DEVICE_ADDR === undefined) {
+    configEndpoint = '/buttons.conf';
+  } else {
+    configEndpoint = `${apiEndpoint}/config`;
+  }
+
   useEffect(() => {
-    fetch('/buttons.conf')
+    fetch(configEndpoint,{mode: 'cors'})
       .then(response => response.text())
       .then(data => {
         const parsedData: { buttons: ButtonGroupsType } = parse(data);
