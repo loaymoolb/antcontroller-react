@@ -14,7 +14,7 @@ const ConsoleLog = ({ logs }: ConsoleLogProps) => {
   }, [logs]);
 
   return (
-    <List sx={{ py: 0 }}>
+    <List sx={{ py: 0, maxWidth: '100%' }}>
       <ListItem sx={{bgcolor: '#D2DADF', borderRadius: '10px' }}>
         <Box 
           ref={terminalRef} 
@@ -35,7 +35,7 @@ const ConsoleLog = ({ logs }: ConsoleLogProps) => {
                 borderRadius: '4px',
               } }}>
           {logs.map((log, index) => (
-            <p key={index}>{log}</p>
+            <p key={index} style={{ width: '100%' }}>{log}</p>
           ))}
         </Box>
       </ListItem>
