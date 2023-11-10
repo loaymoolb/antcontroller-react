@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import "./App.css";
 import Navbar from "./components/Navbar";
 import {
@@ -6,18 +6,17 @@ import {
   createTheme,
   responsiveFontSizes,
 } from "@mui/material/styles";
-import { Grid } from "@mui/material";
+import { Box, Grid } from "@mui/material";
 import ConsoleLog from "./components/ConsoleLog";
-import Stack from "@mui/material/Stack";
 import DeviceTable from "./components/DeviceTable";
-import PinState ,{PinStateIface} from "./components/PinState";
+import PinState, {PinStateIface} from "./components/PinState";
 
 const eventsEndpoint = `${process.env.REACT_APP_DEVICE_ADDR}/events`;
 
 let theme = createTheme({
   typography: {
     fontFamily: "Nunito Sans, sans-serif",
-    fontSize: 16,
+    fontSize: 12,
   },
   palette: {
     primary: {
@@ -31,7 +30,7 @@ let theme = createTheme({
     //   // main: "#D2DADF" // cadet gray
     // },
     success: {
-      main: "#60BE84",
+      main: "#1ED98A",
     },
   },
 });
@@ -137,35 +136,40 @@ const App = () => {
     };
   }, []);
 
+  console.log(pinState)
+
   return (
     <ThemeProvider theme={theme}>
-      <div className="App">
-        { <Navbar /> }
-        <Stack sx={{ maxWidth: "1536px", mx: "auto" }}>
-          <Grid
-            container
-            rowSpacing={{ xs: 4, md: 0 }}
-            columnSpacing={{ xs: 0, md: 4 }}
-            sx={{
-              py: "2rem",
-              px: { xs: "16px", sm: "24px" },
-              alignItems: "flex-start",
-              justifyContent: "center",
-            }}
-          >
-            <Grid item xs={10} md={6}>
-              {/* <TabsComponent /> */}
-              <DeviceTable />
-            </Grid>
-            <Grid item xs={10} md={5}>
-              <ConsoleLog logs={logs} />
-            </Grid>
-            <Grid item xs={2} md={1}>
-              <PinState pins={pinState} />
-            </Grid>
+      <Box className="App" sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'flex-start',
+        height: '100vh',
+        width: '100vw',
+        overflow: { xs: 'auto', md: 'hidden' },
+      }}>
+        <Grid
+          container
+          spacing={{ xs: 2, sm: 3 }}
+          sx={{
+            py: { xs: "1rem", sm: "1.5rem" },
+            px: { xs: "1rem", sm: "1.5rem" },
+            justifyContent: "center",
+            alignItems: 'flex-start',
+          }}
+        >
+          <Grid item xs={12} sx={{ pt: '1 !important' }}>
+            <Navbar />
           </Grid>
-        </Stack>
-      </div>
+          <Grid item xs={12} sm={7}>
+            <DeviceTable />
+          </Grid>
+          <Grid item xs={12} sm={5} pb={2} gap={{ xs: 2, sm: 3 }} display='flex' direction={{ xs: 'column-reverse', sm: 'column' }}>
+            <PinState pins={pinState} />
+            <ConsoleLog logs={logs} />
+          </Grid>
+        </Grid>
+      </Box>
     </ThemeProvider>
   );
 };
