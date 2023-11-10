@@ -18,8 +18,8 @@ const Navbar = () => {
       >
         AntController
       </Typography>
-      <IconButton sx={{ p: 0 }}>
-        <GitHubIcon href="https://github.com/cr1tbit/antcontroller" sx={{  color: "#1ED98A", fontSize: '2.5rem' }} />
+      <IconButton sx={{ p: 0 }} href="https://github.com/cr1tbit/antcontroller" target='_blank' rel="noopener noreferrer">
+        <GitHubIcon sx={{  color: "#1ED98A", fontSize: '2.5rem' }} />
       </IconButton>
     </Box>
   )
