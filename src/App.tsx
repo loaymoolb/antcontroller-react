@@ -164,7 +164,7 @@ const App = () => {
           <Grid item xs={12} sm={7}>
             <DeviceTable />
           </Grid>
-          <Grid item xs={12} sm={5} pb={2} gap={{ xs: 2, sm: 3 }} display='flex' direction={{ xs: 'column-reverse', sm: 'column' }}>
+          <Grid item xs={12} sm={5} pb={2} gap={{ xs: 2, sm: 3 }} display='flex' container direction={{ xs: 'column-reverse', sm: 'column' }}>
             <PinState pins={pinState} />
             <ConsoleLog logs={logs} />
           </Grid>
