@@ -1,6 +1,5 @@
-import React, { useEffect, useRef } from 'react';
-// import { Typography } from '@mui/material';
-import { List, ListItem } from '@mui/material';
+import { useEffect, useRef } from 'react';
+import { Box, List, ListItem } from '@mui/material';
 
 interface ConsoleLogProps {
   logs: string[];
@@ -15,13 +14,13 @@ const ConsoleLog = ({ logs }: ConsoleLogProps) => {
   }, [logs]);
 
   return (
-    <List>
+    <List sx={{ py: 0 }}>
       <ListItem sx={{bgcolor: '#D2DADF', borderRadius: '10px' }}>
-        <div ref={terminalRef} style={{ overflow: "auto", maxHeight: "200px", fontFamily: 'monospace'}}>
+        <Box ref={terminalRef} sx={{ overflow: "auto", maxHeight: { xs: '250px', md: '120px', lg: '200px' }, fontFamily: 'monospace'}}>
           {logs.map((log, index) => (
             <p key={index}>{log}</p>
           ))}
-        </div>
+        </Box>
       </ListItem>
     </List>
   )

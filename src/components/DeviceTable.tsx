@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
@@ -27,7 +27,7 @@ export function activateButton(bGroup: string, bName: string): Promise<boolean> 
       return response.text();
     })
     .then(function(result) {
-      if (result === "OK") {
+      if (result === 'OK') {
         console.log(`but ${bName} activated`);
         return true;
       } else {
@@ -49,8 +49,15 @@ const DeviceTable = () => {
     d: null
   });
 
+  let configEndpoint: string;
+  if (process.env.REACT_APP_DEVICE_ADDR === undefined) {
+    configEndpoint = '/buttons.conf';
+  } else {
+    configEndpoint = `${apiEndpoint}/config`;
+  }
+
   useEffect(() => {
-    fetch('/buttons.conf')
+    fetch(configEndpoint,{mode: 'cors'})
       .then(response => response.text())
       .then(data => {
         const parsedData: { buttons: ButtonGroupsType } = parse(data);
@@ -58,7 +65,7 @@ const DeviceTable = () => {
       });
   }, []);
 
-  // console.log(buttonGroups, "buttonGroups"); 
+  // console.log(buttonGroups, 'buttonGroups'); 
 
   const [checked] = useState<string[]>(() => {
     const savedCheckedButtons = localStorage.getItem('checkedButtons');
@@ -77,7 +84,7 @@ const DeviceTable = () => {
         const butParam = isActive ? 'OFF' : buttonName;
         activateButton(category, butParam);
     } catch (error) {
-        console.error("Error toggling button:", error);
+        console.error('Error toggling button:', error);
     }
   };
 
@@ -102,30 +109,38 @@ const DeviceTable = () => {
 
   return (
     <List
-      sx={{ maxWidth: '100%', bgcolor: '#E9EDEF', borderRadius: "10px" }}
+      sx={{ maxWidth: '100%', bgcolor: '#E9EDEF', borderRadius: '10px' }}
     >
       {groupNames.map(groupName => (
-        <ListItem key={groupName} sx={{ flexDirection: "column", justifyContent: "start", width: '100%' }}>
-          <ListItemButton onClick={() => handleGroupToggle(groupName)} sx={{ width: "100%" }}>
+        <ListItem key={groupName} sx={{ flexDirection: 'column', justifyContent: 'start', width: '100%', py: '0' }}>
+          <ListItemButton onClick={() => handleGroupToggle(groupName)} sx={{ width: '100%', px: { xs: 0, sm: 'inherit' } }}>
             <ListItemText primary={`Group ${groupName.toUpperCase()}`} />
             {openGroup === groupName ? <ExpandLess /> : <ExpandMore />}
           </ListItemButton>
-          <Collapse in={openGroup === groupName} timeout="auto" unmountOnExit sx={{ width: "100%" }}>
-            <List component="div" disablePadding sx={{ flexDirection: "column" }}>
+          <Collapse in={openGroup === groupName} timeout='auto' unmountOnExit sx={{ width: '100%' }}>
+            <List component='div' disablePadding sx={{ display: 'flex', flexWrap: 'wrap' }}>
               {buttonGroups[groupName]?.map(button => (
-                <ListItem key={button.name} sx={{ pl: 4 }}>
-                  <ListItemIcon>
-                    <SettingsInputAntennaIcon style={{ color: checked.indexOf(button.name) !== -1 ? '#60BE84' : 'inherit' }} />
+                <ListItem key={button.name} sx={{ flex: { xs: '100%', sm: '50%' }, maxWidth: { xs: '100%', sm: '50%' }, px: { xs: 0, sm: 2} }}>
+                  <ListItemIcon sx={{ display: { xs: 'none', sm: 'block' }, minWidth: '36px' }}>
+                    <SettingsInputAntennaIcon style={{ color: activeButtons[groupName] === button.name ? '#1ED98A' : 'inherit' }} />
                   </ListItemIcon>
-                  <ListItemText primary={button.name} secondary={button.descr} />
+                  <ListItemText 
+                    primary={button.name} 
+                    secondary={button.descr} 
+                    sx={{
+                      fontSize: '1rem',
+                      wordBreak: 'break-word',
+                      my: 0 
+                    }}
+                  />
                   <Switch
-                    edge="end"
+                    edge='end'
                     onChange={() => handleToggle(groupName, button.name)}
                     checked={activeButtons[groupName] === button.name}
                     inputProps={{
                       'aria-labelledby': `switch-list-label-${button.name}`,
                     }}
-                    color="success"
+                    color='success'
                   />
                 </ListItem>
               ))}
