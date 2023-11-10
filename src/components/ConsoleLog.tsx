@@ -16,7 +16,24 @@ const ConsoleLog = ({ logs }: ConsoleLogProps) => {
   return (
     <List sx={{ py: 0 }}>
       <ListItem sx={{bgcolor: '#D2DADF', borderRadius: '10px' }}>
-        <Box ref={terminalRef} sx={{ overflow: "auto", maxHeight: { xs: '250px', md: '120px', lg: '200px' }, fontFamily: 'monospace'}}>
+        <Box 
+          ref={terminalRef} 
+          sx={{ 
+              overflow: "auto", 
+              maxHeight: { xs: '250px', md: '120px', lg: '200px' }, 
+              fontFamily: 'monospace', 
+              '&::-webkit-scrollbar': {
+                width: '4px',
+                height: '4px',
+              },
+              '&::-webkit-scrollbar-track': {
+                background: '#e5e5e5',
+                borderRadius: '4px',
+              },
+              '&::-webkit-scrollbar-thumb': {
+                background: '#ccc',
+                borderRadius: '4px',
+              } }}>
           {logs.map((log, index) => (
             <p key={index}>{log}</p>
           ))}
