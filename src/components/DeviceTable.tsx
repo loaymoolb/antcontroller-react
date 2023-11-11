@@ -1,23 +1,18 @@
 import { useEffect, useState } from 'react';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import Switch from '@mui/material/Switch';
-import SettingsInputAntennaIcon from '@mui/icons-material/SettingsInputAntenna';
-import { Collapse, ListItemButton } from '@mui/material';
+import { Box, Button, Divider, Typography } from '@mui/material';
 import { parse } from 'toml';
-import { ExpandLess, ExpandMore } from '@mui/icons-material';
 
 const apiEndpoint = `${process.env.REACT_APP_DEVICE_ADDR}/api`;
 
-interface Button {
+interface IButton {
   name: string;
-  descr: string;
+  descr?: string;
   pins?: string[];
 }
 
-type ButtonGroupsType = Record<string, Button[]>;
+type ButtonGroupsType = Record<string, IButton[]>;
 export function activateButton(bGroup: string, bName: string): Promise<boolean> {
   console.log(`activating ${bGroup} to ${bName}`);
   let fetchCall = `${apiEndpoint}/BUT/${bGroup}/${bName}`
@@ -38,9 +33,9 @@ export function activateButton(bGroup: string, bName: string): Promise<boolean> 
 }
 
 const DeviceTable = () => {
-  const [buttonGroups, setButtonGroups] = useState<ButtonGroupsType>({});  
+  const [buttonGroups, setButtonGroups] = useState<ButtonGroupsType>({}); 
+   
   const groupNames = ['a', 'b', 'c', 'd'];  
-  const [openGroup, setOpenGroup] = useState<string | null>(null);
   
   const [activeButtons, setActiveButtons] = useState<Record<string, string | null>>({
     a: null,
@@ -63,9 +58,9 @@ const DeviceTable = () => {
         const parsedData: { buttons: ButtonGroupsType } = parse(data);
         setButtonGroups(parsedData.buttons);
       });
-  }, []);
+  }, [configEndpoint]);
 
-  // console.log(buttonGroups, 'buttonGroups'); 
+  console.log(buttonGroups, 'buttonGroups'); 
 
   const [checked] = useState<string[]>(() => {
     const savedCheckedButtons = localStorage.getItem('checkedButtons');
@@ -103,50 +98,51 @@ const DeviceTable = () => {
     }
   }, []);
 
-  const handleGroupToggle = (groupName: string) => {
-    setOpenGroup(openGroup === groupName ? null : groupName);
-  };
 
   return (
     <List
-      sx={{ maxWidth: '100%', bgcolor: '#E9EDEF', borderRadius: '10px' }}
+      sx={{ maxWidth: '100%', bgcolor: '#E9EDEF', borderRadius: '10px', py: 0 }}
     >
-      {groupNames.map(groupName => (
+      {groupNames.map((groupName, index) => (
+        <>
+        {index > 0 && (
+          <Box sx={{ px: 3, my: { xs: 0, lg: 1 } }}>
+            <Divider />
+          </Box>
+        )}
         <ListItem key={groupName} sx={{ flexDirection: 'column', justifyContent: 'start', width: '100%', py: '0' }}>
-          <ListItemButton onClick={() => handleGroupToggle(groupName)} sx={{ width: '100%', px: { xs: 0, sm: 'inherit' } }}>
-            <ListItemText primary={`Group ${groupName.toUpperCase()}`} />
-            {openGroup === groupName ? <ExpandLess /> : <ExpandMore />}
-          </ListItemButton>
-          <Collapse in={openGroup === groupName} timeout='auto' unmountOnExit sx={{ width: '100%' }}>
-            <List component='div' disablePadding sx={{ display: 'flex', flexWrap: 'wrap' }}>
-              {buttonGroups[groupName]?.map(button => (
-                <ListItem key={button.name} sx={{ flex: { xs: '100%', sm: '50%' }, maxWidth: { xs: '100%', sm: '50%' }, px: { xs: 0, sm: 2} }}>
-                  <ListItemIcon sx={{ display: { xs: 'none', sm: 'block' }, minWidth: '36px' }}>
-                    <SettingsInputAntennaIcon style={{ color: activeButtons[groupName] === button.name ? '#1ED98A' : 'inherit' }} />
-                  </ListItemIcon>
-                  <ListItemText 
-                    primary={button.name} 
-                    secondary={button.descr} 
-                    sx={{
-                      fontSize: '1rem',
-                      wordBreak: 'break-word',
-                      my: 0 
-                    }}
-                  />
-                  <Switch
-                    edge='end'
-                    onChange={() => handleToggle(groupName, button.name)}
-                    checked={activeButtons[groupName] === button.name}
-                    inputProps={{
-                      'aria-labelledby': `switch-list-label-${button.name}`,
-                    }}
-                    color='success'
-                  />
-                </ListItem>
-              ))}
-            </List>
-          </Collapse>
+          <List disablePadding sx={{ width: '100%', display: 'flex', flexWrap: 'wrap', my: 1 }}>
+            {buttonGroups[groupName]?.map(button => (
+              <ListItem key={button.name} sx={{ flex: { xs: '100%', sm: '33%', md: '25%' }, maxWidth: { xs: '50%', sm: '33%', md: '25%' }, p: { xs: 0.5, md: 1 } }}>
+                <Button 
+                  variant="outlined"
+                  onClick={() => handleToggle(groupName, button.name)}
+                  sx={{
+                    p: { xs: 0.7, md: 1 },
+                    border: 1.5,
+                    borderColor: activeButtons[groupName] === button.name ? '#1ED98A' : 'inherit',
+                    borderRadius: '12px',
+                    display: 'flex',
+                    justifyContent: 'start',
+                    width: '100%',
+                    textTransform: 'none',
+                    backgroundColor: activeButtons[groupName] === button.name ? '#1ED98A' : 'inherit',
+                    '&:hover': {
+                      border: 1.5,
+                      borderColor: activeButtons[groupName] === button.name ? '#1ED98A' : 'inherit',
+                      backgroundColor: activeButtons[groupName] === button.name ? '#1ED98A' : 'inherit',
+                    },
+                  }}
+                >
+                  <Box>
+                    <Typography variant='body2' sx={{ textAlign: 'left', wordBreak: 'break-word', fontSize: { xs: '0.7rem', md: '0.75rem' } }}>{button.name}</Typography>
+                  </Box>
+                </Button>
+              </ListItem>
+            ))}
+          </List>
         </ListItem>
+          </>
       ))}
     </List>
   )

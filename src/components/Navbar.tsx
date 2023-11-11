@@ -2,26 +2,69 @@ import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import GitHubIcon from '@mui/icons-material/GitHub';
+import EditIcon from '@mui/icons-material/Edit';
+import { Stack } from '@mui/material';
+import RestartAltIcon from '@mui/icons-material/RestartAlt';
+import ModalComponent from './Modal';
+import { useState } from 'react';
 
 const Navbar = () => {
+  const [isModalOpen, setModalOpen] = useState(false);
+
+  const handleOpenModal = () => setModalOpen(true);
+  const handleCloseModal = () => setModalOpen(false);
+  
+  const handleSubmit = () => {
+    
+    handleCloseModal();
+  };
+  // ???
+  // fetch('/api/RST', { mode: 'cors' })
+  //   .then(response => {
+  //     if (!response.ok) {
+  //       throw new Error(`HTTP error: ${response.status}`);
+  //     }
+  //     return response.json();
+  //   })
+  //   .then(data => console.log(data))
+  //   .catch(error => console.error('Error fetching data:', error));
+  // }
+  
   return (
-    <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-      <Typography
-        variant="h4"
-        component="h1"
-        sx={{
-          fontWeight: 700,
-          color: 'primary.main',
-          alignSelf: 'center',
-          mr: 2
-        }}
-      >
-        AntController
-      </Typography>
-      <IconButton sx={{ p: 0 }} href="https://github.com/cr1tbit/antcontroller" target='_blank' rel="noopener noreferrer">
-        <GitHubIcon sx={{  color: "#1ED98A", fontSize: '2.5rem' }} />
-      </IconButton>
-    </Box>
+    <Box sx={{ display: 'flex' }}>
+      <Stack direction='row' flex='1' justifyContent='center'>
+        <Typography
+          variant="h4"
+          component="h1"
+          sx={{
+            fontWeight: 700,
+            color: 'primary.main',
+            alignSelf: 'center',
+            mr: 2
+          }}
+        >
+          AntController
+        </Typography>
+        <IconButton sx={{ p: 0 }} href="https://github.com/cr1tbit/antcontroller" target='_blank' rel="noopener noreferrer">
+          <GitHubIcon sx={{  color: "#1ED98A", fontSize: '2rem' }} />
+        </IconButton>
+      </Stack>
+      <Stack direction="row" sx={{ position: {xs: 'static', md: 'absolute'}, right: '26%' }}>
+        <IconButton href="/edit"  target="_blank" title='edit config' sx={{ p: 0, '&:hover': { background: 'none' } }}>
+          <EditIcon sx={{ fontSize: '2rem' }} />
+        </IconButton>
+        <IconButton onClick={handleOpenModal} title='restart device' sx={{ p: 0, ml: 1, '&:hover': { background: 'none' } }}>
+          <RestartAltIcon sx={{ fontSize: '2rem' }} />
+        </IconButton>
+      </Stack>
+      <ModalComponent 
+        open={isModalOpen} 
+        heading="Restart Device"
+        subheading="Are you sure you want to restart the device?"
+        close={handleCloseModal} 
+        submit={handleSubmit}
+      />
+    </Box> 
   )
 }
 

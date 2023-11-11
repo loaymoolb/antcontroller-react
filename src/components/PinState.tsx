@@ -16,7 +16,7 @@ type PinStateProps = {pins : PinStateIface};
 const PinState = ({pins} : PinStateProps) => {
   return (    
     <>
-      <Stack direction="row" spacing={{xs: 2, sm: 1, md: 4}} sx={{ bgcolor: '#D2DADF', borderRadius: '10px', p: 2, justifyContent: 'center', textAlign: 'center' }}>
+      <Stack direction="row" spacing={{xs: 2, sm: 0.5, lg: 2}} sx={{ bgcolor: '#D2DADF', borderRadius: '10px', p: 2, justifyContent: 'center', textAlign: 'center' }}>
         {Object.entries(pins).map(([tag, content], index) => (
           <Box key={index}>
             <Typography variant="body1">{tag}</Typography>
@@ -26,7 +26,7 @@ const PinState = ({pins} : PinStateProps) => {
                 <Box
                   key={key}
                   sx={{
-                    width: '35px',
+                    width: '32px',
                     height: 12,
                     backgroundColor: value.state ? '#1ED98A' : '#909090',
                     borderRadius: '6px',

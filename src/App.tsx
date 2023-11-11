@@ -156,17 +156,18 @@ const App = () => {
             px: { xs: "1rem", sm: "1.5rem" },
             justifyContent: "center",
             alignItems: 'flex-start',
+            maxWidth: '1536px',
           }}
         >
           <Grid item xs={12} sx={{ pt: '1 !important' }}>
             <Navbar />
           </Grid>
-          <Grid item xs={12} sm={7}>
+          <Grid item xs={12} sm={7} md={8} lg={9}>
             <DeviceTable />
           </Grid>
-          <Grid item xs={12} sm={5} pb={2} gap={{ xs: 2, sm: 3 }} display='flex' container direction={{ xs: 'column-reverse', sm: 'column' }}>
-            <PinState pins={pinState} />
+          <Grid item xs={12} sm={5} md={4} lg={3} pb={2} gap={{ xs: 2, sm: 3 }} display='flex' container direction='column'>
             <ConsoleLog logs={logs} />
+            <PinState pins={pinState} />
           </Grid>
         </Grid>
       </Box>
