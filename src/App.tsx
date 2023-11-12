@@ -10,31 +10,9 @@ import theme from './theme';
 
 const eventsEndpoint = `${process.env.REACT_APP_DEVICE_ADDR}/events`;
 
-// export interface DeviceStateIface {
-//   io: {
-//     [key: string]: {
-//       type: string;
-//       bits: number;
-//       ioNum: number;
-//     };
-//   }[];
-//   buttons: {
-//     groups: {
-//       a: string;
-//       b: string;
-//       c: string;
-//       d: string;
-//     };
-//   };
-// }
-
 export const JSON_EXAMPLE = `{
   "io": {
-      "MOS": {"type": "output", "bits": 32768, "ioNum": 16},
-      "REL": {"type": "output", "bits": 32767, "ioNum": 15},
-      "OPT": {"type": "output", "bits": 0, "ioNum": 8 },
-      "TTL": {"type": "output", "bits": 31, "ioNum": 8 },
-      "DUPA": {"type": "input", "bits": 69, "ioNum": 12}
+      "UND": {"type": "output", "bits": 0, "ioNum": 1}
   },
   "buttons": {
       "groups": {
@@ -47,6 +25,27 @@ export const JSON_EXAMPLE = `{
   "msg": "OK",
   "retCode": 200
 }`
+
+// can be used for development
+// export const JSON_EXAMPLE = `{
+//   "io": {
+//       "MOS": {"type": "output", "bits": 32768, "ioNum": 16},
+//       "REL": {"type": "output", "bits": 32767, "ioNum": 15},
+//       "OPT": {"type": "output", "bits": 0, "ioNum": 8 },
+//       "TTL": {"type": "output", "bits": 31, "ioNum": 8 },
+//       "DUPA": {"type": "input", "bits": 69, "ioNum": 12}
+//   },
+//   "buttons": {
+//       "groups": {
+//           "a": "OFF",
+//           "b": "OFF",
+//           "c": "OFF",
+//           "d": "OFF"
+//       }
+//   },
+//   "msg": "OK",
+//   "retCode": 200
+// }`
 
 interface pinProps {
   type: string;

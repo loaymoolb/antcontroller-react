@@ -10,6 +10,9 @@ import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import ModalComponent from './Modal';
 import { useState } from 'react';
 
+const apiEndpoint = `${process.env.REACT_APP_DEVICE_ADDR}/api`;
+
+
 const Navbar = () => {
   const [isModalOpen, setModalOpen] = useState(false);
 
@@ -17,20 +20,19 @@ const Navbar = () => {
   const handleCloseModal = () => setModalOpen(false);
   
   const handleSubmit = () => {
-    
+
+    fetch(`${apiEndpoint}/RST`, { mode: 'cors' })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(data => console.log(data))
+      .catch(error => console.error('Error fetching data:', error));
+
     handleCloseModal();
   };
-  // ???
-  // fetch('/api/RST', { mode: 'cors' })
-  //   .then(response => {
-  //     if (!response.ok) {
-  //       throw new Error(`HTTP error: ${response.status}`);
-  //     }
-  //     return response.json();
-  //   })
-  //   .then(data => console.log(data))
-  //   .catch(error => console.error('Error fetching data:', error));
-  // }
   
   return (
     <Box sx={{ display: 'flex' }}>
