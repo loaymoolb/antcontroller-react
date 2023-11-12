@@ -15,7 +15,7 @@ const ConsoleLog = ({ logs }: ConsoleLogProps) => {
 
   return (
     <List sx={{ py: 0, maxWidth: '100%' }}>
-      <ListItem sx={{bgcolor: '#D2DADF', borderRadius: '10px' }}>
+      <ListItem sx={{bgcolor: 'secondary.dark', borderRadius: '10px' }}>
         <Box 
           ref={terminalRef} 
           sx={{ 

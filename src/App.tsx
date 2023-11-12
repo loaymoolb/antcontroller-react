@@ -1,40 +1,14 @@
 import { useState, useEffect } from 'react';
 import "./App.css";
 import Navbar from "./components/Navbar";
-import {
-  ThemeProvider,
-  createTheme,
-  responsiveFontSizes,
-} from "@mui/material/styles";
+import { ThemeProvider } from "@mui/material/styles";
 import { Box, Grid } from "@mui/material";
 import ConsoleLog from "./components/ConsoleLog";
 import DeviceTable from "./components/DeviceTable";
 import PinState, {PinStateIface} from "./components/PinState";
+import theme from './theme';
 
 const eventsEndpoint = `${process.env.REACT_APP_DEVICE_ADDR}/events`;
-
-let theme = createTheme({
-  typography: {
-    fontFamily: "Nunito Sans, sans-serif",
-    fontSize: 12,
-  },
-  palette: {
-    primary: {
-      main: "#080B0C", // black
-    },
-    secondary: {
-      main: "#ABC8C7", // ash gray
-    },
-    // secondaryLight: {
-    //   main: "#D5E4E3" // ash gray
-    //   // main: "#D2DADF" // cadet gray
-    // },
-    success: {
-      main: "#1ED98A",
-    },
-  },
-});
-theme = responsiveFontSizes(theme);
 
 // export interface DeviceStateIface {
 //   io: {

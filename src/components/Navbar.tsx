@@ -46,7 +46,7 @@ const Navbar = () => {
           AntController
         </Typography>
         <IconButton sx={{ p: 0 }} href="https://github.com/cr1tbit/antcontroller" target='_blank' rel="noopener noreferrer">
-          <GitHubIcon sx={{  color: "#1ED98A", fontSize: '2rem' }} />
+          <GitHubIcon sx={{  color: 'success.main', fontSize: '2rem' }} />
         </IconButton>
       </Stack>
       <Stack direction="row" sx={{ position: {xs: 'static', md: 'absolute'}, right: '26%' }}>

@@ -101,7 +101,7 @@ const DeviceTable = () => {
 
   return (
     <List
-      sx={{ maxWidth: '100%', bgcolor: '#E9EDEF', borderRadius: '10px', py: 0 }}
+      sx={{ maxWidth: '100%', bgcolor: 'primary.light', borderRadius: '10px', py: 0 }}
     >
       {groupNames.map((groupName, index) => (
         <>
@@ -120,17 +120,17 @@ const DeviceTable = () => {
                   sx={{
                     p: { xs: 0.7, md: 1 },
                     border: 1.5,
-                    borderColor: activeButtons[groupName] === button.name ? '#1ED98A' : 'inherit',
+                    borderColor: activeButtons[groupName] === button.name ? 'success.main' : 'inherit',
                     borderRadius: '12px',
                     display: 'flex',
                     justifyContent: 'start',
                     width: '100%',
                     textTransform: 'none',
-                    backgroundColor: activeButtons[groupName] === button.name ? '#1ED98A' : 'inherit',
+                    backgroundColor: activeButtons[groupName] === button.name ? 'success.main' : 'inherit',
                     '&:hover': {
                       border: 1.5,
-                      borderColor: activeButtons[groupName] === button.name ? '#1ED98A' : 'inherit',
-                      backgroundColor: activeButtons[groupName] === button.name ? '#1ED98A' : 'inherit',
+                      borderColor: activeButtons[groupName] === button.name ? 'success.main' : 'inherit',
+                      backgroundColor: activeButtons[groupName] === button.name ? 'success.main' : 'inherit',
                     },
                   }}
                 >
