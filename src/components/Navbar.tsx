@@ -3,6 +3,8 @@ import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import EditIcon from '@mui/icons-material/Edit';
+import EditNoteIcon from '@mui/icons-material/EditNote';
+import UpgradeIcon from '@mui/icons-material/Upgrade';
 import { Stack } from '@mui/material';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import ModalComponent from './Modal';
@@ -51,10 +53,13 @@ const Navbar = () => {
       </Stack>
       <Stack direction="row" sx={{ position: {xs: 'static', md: 'absolute'}, right: '26%' }}>
         <IconButton href="/edit"  target="_blank" title='edit config' sx={{ p: 0, '&:hover': { background: 'none' } }}>
-          <EditIcon sx={{ fontSize: '2rem' }} />
+          <EditNoteIcon sx={{ fontSize: '2rem' }} />
         </IconButton>
         <IconButton onClick={handleOpenModal} title='restart device' sx={{ p: 0, ml: 1, '&:hover': { background: 'none' } }}>
-          <RestartAltIcon sx={{ fontSize: '2rem' }} />
+          <RestartAltIcon sx={{ fontSize: '1.7rem' }} />
+        </IconButton>
+        <IconButton href="https://vcc.earth/antcontroller"  target="_blank" title='update firmware' sx={{ p: 0, '&:hover': { background: 'none' } }}>
+          <UpgradeIcon sx={{ fontSize: '2rem' }} />
         </IconButton>
       </Stack>
       <ModalComponent 
