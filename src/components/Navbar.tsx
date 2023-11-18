@@ -12,8 +12,11 @@ import { useState } from 'react';
 
 const apiEndpoint = `${process.env.REACT_APP_DEVICE_ADDR}/api`;
 
+export interface NavbarProps {
+  backendState: string;
+}
 
-const Navbar = () => {
+const Navbar: React.FC<NavbarProps> = ({backendState} : NavbarProps) => {
   const [isModalOpen, setModalOpen] = useState(false);
 
   const handleOpenModal = () => setModalOpen(true);
@@ -36,7 +39,12 @@ const Navbar = () => {
   
   return (
     <Box sx={{ display: 'flex' }}>
+      <Stack direction='row' sx={{ position: {xs: 'static', md: 'absolute'}, left: '26%' }}>
+        <p style={{ color: 'black', alignSelf: 'left' }}>{backendState}</p>
+      </Stack>
+
       <Stack direction='row' flex='1' justifyContent='center'>
+        <img src="https://vcc.earth/img/pony.webp" alt="friendship is magic" width="40" height="40" />
         <Typography
           variant="h4"
           component="h1"
@@ -53,10 +61,12 @@ const Navbar = () => {
           <GitHubIcon sx={{  color: 'success.main', fontSize: '2rem' }} />
         </IconButton>
       </Stack>
+
       <Stack direction="row" sx={{ position: {xs: 'static', md: 'absolute'}, right: '26%' }}>
         <IconButton href="/edit"  target="_blank" title='edit config' sx={{ p: 0, '&:hover': { background: 'none' } }}>
           <EditNoteIcon sx={{ fontSize: '2rem' }} />
         </IconButton>
+        
         <IconButton onClick={handleOpenModal} title='restart device' sx={{ p: 0, ml: 1, '&:hover': { background: 'none' } }}>
           <RestartAltIcon sx={{ fontSize: '1.7rem' }} />
         </IconButton>
@@ -64,6 +74,7 @@ const Navbar = () => {
           <UpgradeIcon sx={{ fontSize: '2rem' }} />
         </IconButton>
       </Stack>
+
       <ModalComponent 
         open={isModalOpen} 
         heading="Restart Device"

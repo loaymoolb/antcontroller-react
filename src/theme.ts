@@ -17,7 +17,7 @@ let theme = createTheme({
         light: "#E5E5E5", 
       },
       success: {
-        main: "#1ED98A",
+        main: "#D98EDA",
       },
     },
 });

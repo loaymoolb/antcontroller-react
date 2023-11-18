@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import "./App.css";
-import Navbar from "./components/Navbar";
+import Navbar, {NavbarProps} from "./components/Navbar";
 import { ThemeProvider } from "@mui/material/styles";
 import { Box, Grid } from "@mui/material";
 import ConsoleLog from "./components/ConsoleLog";
-import DeviceTable from "./components/DeviceTable";
 import PinState, {PinStateIface} from "./components/PinState";
+import DeviceTable, {DeviceStateIface} from "./components/DeviceTable";
 import theme from './theme';
 
 const eventsEndpoint = `${process.env.REACT_APP_DEVICE_ADDR}/events`;
@@ -54,8 +54,7 @@ interface pinProps {
 }
 
 function pinStateFromJSON(json: string): PinStateIface {  
-  console.log(`parsing json: ${json}`);
-  
+  // console.log(`parsing json: ${json}`);  
   const retPinState : PinStateIface = {};
 
   const parsed = JSON.parse(json);
@@ -75,22 +74,58 @@ function pinStateFromJSON(json: string): PinStateIface {
   return retPinState;
 }
 
+function buttonStateFromJSON(json: string): DeviceStateIface {  
+  // console.log(`parsing json: ${json}`);
+  const deviceState : DeviceStateIface = {};
+
+  const parsed = JSON.parse(json);
+  for (const [key, value] of Object.entries(parsed.buttons.groups)) {
+    if (deviceState[key] === undefined) {
+
+    } else {
+      deviceState[key].currentButton = value as string;
+      deviceState[key].confirmed = false;
+    }    
+  }
+  return deviceState;
+}
+
 const App = () => {
-  const [logs, setLogs] = useState<string[]>(["connecting to the device..."]);
+  const [logs, setLogs] = useState<string[]>([">> connecting to the device..."]);
   const [pinState, setPinState] = 
     useState<PinStateIface>(() => pinStateFromJSON(JSON_EXAMPLE));
+  const [deviceState, setDeviceState] = 
+    useState<DeviceStateIface>(() => buttonStateFromJSON(JSON_EXAMPLE));
+
+  const [backendState, setBackendState] = 
+    useState<string>(() => "unknown");
 
   useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+
     const sse = new EventSource(eventsEndpoint);
+
+    const setHeartbeatTimeout = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        console.log("No heartbeat event received for 5 seconds.");
+        // You can add your notification logic here
+        setBackendState("timeout");
+      }, 5 * 1000);
+    };
+
     function getRealtimeData(data: any) {
         console.log(`Connected!`);
         console.log(data);
-        setLogs((prevLogs) => [...prevLogs, `Connected!`, data]);
+        setLogs((prevLogs) => [...prevLogs, data]);
       } 
     sse.onmessage = e => getRealtimeData(e.data);
     sse.onerror = () => {
-      console.log("socket error. closing.");
-      sse.close();
+      setBackendState("disconnected");
+    }
+    sse.onopen = () => {
+      console.log("socket open");
+      setBackendState("connected");
     }
     sse.addEventListener('log', (e) => {
       console.log(e.data);
@@ -100,11 +135,18 @@ const App = () => {
       // console.log("New state:");
       try {
         setPinState(pinStateFromJSON(e.data));
+        setDeviceState(buttonStateFromJSON(e.data));
       } catch (error) {
         console.log(error);
       }
+    });    
+    sse.addEventListener('heartbeat', (e) => {
+      setHeartbeatTimeout();
+      console.log("dokidoki");
     });
+
     return () => {
+      clearTimeout(timeoutId); // Clear the timeout if the component unmounts
       sse.close();
     };
   }, []);
@@ -121,9 +163,7 @@ const App = () => {
         width: '100vw',
         overflow: { xs: 'auto', md: 'hidden' },
       }}>
-        <Grid
-          container
-          spacing={{ xs: 2, sm: 3 }}
+        <Grid container spacing={{ xs: 2, sm: 3 }}
           sx={{
             py: { xs: "1rem", sm: "1.5rem" },
             px: { xs: "1rem", sm: "1.5rem" },
@@ -133,17 +173,18 @@ const App = () => {
           }}
         >
           <Grid item xs={12} sx={{ pt: '1 !important' }}>
-            <Navbar />
+            <Navbar backendState={backendState} />
           </Grid>
           <Grid item xs={12} sm={7} md={8} lg={9}>
-            <DeviceTable />
+            <DeviceTable devices={deviceState}/>
           </Grid>
-          <Grid item xs={12} sm={5} md={4} lg={3} pb={2} gap={{ xs: 2, sm: 3 }} display='flex' container direction='column'>
+          <Grid item xs={12} sm={4} md={3} lg={2} pb={2} gap={{ xs: 2, sm: 3 }} display='flex' container direction='column'>
             <ConsoleLog logs={logs} />
             <PinState pins={pinState} />
           </Grid>
         </Grid>
       </Box>
+      <p>Backend state: {backendState}</p>
     </ThemeProvider>
   );
 };

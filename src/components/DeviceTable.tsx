@@ -12,6 +12,13 @@ interface IButton {
   pins?: string[];
 }
 
+export interface DeviceStateIface {
+  [tag: string]: {
+    currentButton: string;
+    confirmed: boolean;
+  }
+}
+
 type ButtonGroupsType = Record<string, IButton[]>;
 export function activateButton(bGroup: string, bName: string): Promise<boolean> {
   console.log(`activating ${bGroup} to ${bName}`);
@@ -32,7 +39,10 @@ export function activateButton(bGroup: string, bName: string): Promise<boolean> 
     });
 }
 
-const DeviceTable = () => {
+type DeviceStateProps = {devices: DeviceStateIface};
+
+
+const DeviceTable = ({devices} : DeviceStateProps) => {
   const [buttonGroups, setButtonGroups] = useState<ButtonGroupsType>({}); 
    
   const groupNames = ['a', 'b', 'c', 'd'];  
