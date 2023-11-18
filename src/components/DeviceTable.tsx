@@ -23,35 +23,29 @@ type ButtonGroupsType = Record<string, IButton[]>;
 export function activateButton(bGroup: string, bName: string): Promise<boolean> {
   console.log(`activating ${bGroup} to ${bName}`);
   let fetchCall = `${apiEndpoint}/BUT/${bGroup}/${bName}`
-  console.log(fetchCall)
+  // console.log(fetchCall)
   return fetch(fetchCall, {mode: 'cors'})
     .then(function(response) {
       return response.text();
     })
     .then(function(result) {
-      if (result === 'OK') {
-        console.log(`but ${bName} activated`);
-        return true;
-      } else {
-        console.log(`but ${bName} ERR: ${result}`);
-        return false;
-      }
+      console.log(`but ${bName}: ${result}`);
+      return true;
     });
 }
 
 type DeviceStateProps = {devices: DeviceStateIface};
-
 
 const DeviceTable = ({devices} : DeviceStateProps) => {
   const [buttonGroups, setButtonGroups] = useState<ButtonGroupsType>({}); 
    
   const groupNames = ['a', 'b', 'c', 'd'];  
   
-  const [activeButtons, setActiveButtons] = useState<Record<string, string | null>>({
-    a: null,
-    b: null,
-    c: null,
-    d: null
+  const [activeButtons, setActiveButtons] = useState<DeviceStateIface>({
+    a: { currentButton: 'OFF', confirmed: false },
+    b: { currentButton: 'OFF', confirmed: false },
+    c: { currentButton: 'OFF', confirmed: false },
+    d: { currentButton: 'OFF', confirmed: false }
   });
 
   let configEndpoint: string;
@@ -62,6 +56,7 @@ const DeviceTable = ({devices} : DeviceStateProps) => {
   }
 
   useEffect(() => {
+    console.log("fetching buttons")
     fetch(configEndpoint,{mode: 'cors'})
       .then(response => response.text())
       .then(data => {
@@ -70,18 +65,21 @@ const DeviceTable = ({devices} : DeviceStateProps) => {
       });
   }, [configEndpoint]);
 
-  console.log(buttonGroups, 'buttonGroups'); 
+  useEffect(() => {
+    setActiveButtons(devices);
+    // console.log('devicesToUpdate', devices.a);
+  }, [devices]);
 
-  const [checked] = useState<string[]>(() => {
-    const savedCheckedButtons = localStorage.getItem('checkedButtons');
-    return savedCheckedButtons ? JSON.parse(savedCheckedButtons) : [];
-  });
+  console.log('buttonGroups', buttonGroups); 
 
   const handleToggle = async (category: string, buttonName: string) => {
-    const isActive = activeButtons[category] === buttonName;
+    const isActive = activeButtons[category].currentButton === buttonName;
     const newState = {
-        ...activeButtons,
-        [category]: isActive ? null : buttonName
+      ...activeButtons,
+      [category]: {
+        currentButton: isActive ? 'OFF' : buttonName,
+        confirmed: false
+      }
     };
     setActiveButtons(newState);
     
@@ -93,21 +91,28 @@ const DeviceTable = ({devices} : DeviceStateProps) => {
     }
   };
 
-  useEffect(() => {
-    localStorage.setItem('checkedButtons', JSON.stringify(checked));
-  }, [checked]);
-
-  useEffect(() => {
-    localStorage.setItem('activeButtons', JSON.stringify(activeButtons));
-  }, [activeButtons]);
-
-  useEffect(() => {
-    const savedActiveButtons = localStorage.getItem('activeButtons');
-    if (savedActiveButtons) {
-        setActiveButtons(JSON.parse(savedActiveButtons));
-    }
-  }, []);
-
+  const getButtonStyles = (groupName: string, buttonName: string) => {
+    const isActive = activeButtons[groupName].currentButton === buttonName;
+    const isConfirmed = activeButtons[groupName].confirmed;
+  
+    const activeConfirmed = isActive && isConfirmed;
+    return {
+      p: { xs: 0.7, md: 1 },
+      border: 1.5,
+      borderColor: isActive ? 'success.main' : 'inherit',
+      borderRadius: '12px',
+      display: 'flex',
+      justifyContent: 'start',
+      width: '100%',
+      textTransform: 'none',
+      backgroundColor: activeConfirmed ? 'success.main' : 'inherit',
+      '&:hover': {
+        border: 1.5,
+        borderColor: isActive ? 'success.main' : 'inherit',
+        backgroundColor: activeConfirmed ? 'success.main' : 'inherit',
+      },
+    };
+  };
 
   return (
     <List
@@ -127,22 +132,7 @@ const DeviceTable = ({devices} : DeviceStateProps) => {
                 <Button 
                   variant="outlined"
                   onClick={() => handleToggle(groupName, button.name)}
-                  sx={{
-                    p: { xs: 0.7, md: 1 },
-                    border: 1.5,
-                    borderColor: activeButtons[groupName] === button.name ? 'success.main' : 'inherit',
-                    borderRadius: '12px',
-                    display: 'flex',
-                    justifyContent: 'start',
-                    width: '100%',
-                    textTransform: 'none',
-                    backgroundColor: activeButtons[groupName] === button.name ? 'success.main' : 'inherit',
-                    '&:hover': {
-                      border: 1.5,
-                      borderColor: activeButtons[groupName] === button.name ? 'success.main' : 'inherit',
-                      backgroundColor: activeButtons[groupName] === button.name ? 'success.main' : 'inherit',
-                    },
-                  }}
+                  sx={getButtonStyles(groupName, button.name)}
                 >
                   <Box>
                     <Typography variant='body2' sx={{ textAlign: 'left', wordBreak: 'break-word', fontSize: { xs: '0.7rem', md: '0.75rem' } }}>{button.name}</Typography>

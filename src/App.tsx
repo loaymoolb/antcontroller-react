@@ -80,12 +80,10 @@ function buttonStateFromJSON(json: string): DeviceStateIface {
 
   const parsed = JSON.parse(json);
   for (const [key, value] of Object.entries(parsed.buttons.groups)) {
-    if (deviceState[key] === undefined) {
-
-    } else {
-      deviceState[key].currentButton = value as string;
-      deviceState[key].confirmed = false;
-    }    
+    deviceState[key] = {
+      currentButton: value as string,
+      confirmed: true
+    } 
   }
   return deviceState;
 }
@@ -115,8 +113,8 @@ const App = () => {
     };
 
     function getRealtimeData(data: any) {
-        console.log(`Connected!`);
-        console.log(data);
+        // console.log(`Connected!`);
+        // console.log(data);
         setLogs((prevLogs) => [...prevLogs, data]);
       } 
     sse.onmessage = e => getRealtimeData(e.data);
@@ -124,11 +122,11 @@ const App = () => {
       setBackendState("disconnected");
     }
     sse.onopen = () => {
-      console.log("socket open");
+      // console.log("socket open");
       setBackendState("connected");
     }
     sse.addEventListener('log', (e) => {
-      console.log(e.data);
+      // console.log(e.data);
       setLogs((prevLogs) => [...prevLogs, e.data]);
     });
     sse.addEventListener('state', (e) => {
@@ -142,7 +140,7 @@ const App = () => {
     });    
     sse.addEventListener('heartbeat', (e) => {
       setHeartbeatTimeout();
-      console.log("dokidoki");
+      // console.log("dokidoki");
     });
 
     return () => {
@@ -151,7 +149,7 @@ const App = () => {
     };
   }, []);
 
-  console.log(pinState)
+  // console.log(pinState)
 
   return (
     <ThemeProvider theme={theme}>
