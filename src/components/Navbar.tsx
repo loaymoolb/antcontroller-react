@@ -5,8 +5,9 @@ import GitHubIcon from '@mui/icons-material/GitHub';
 import EditIcon from '@mui/icons-material/Edit';
 import EditNoteIcon from '@mui/icons-material/EditNote';
 import UpgradeIcon from '@mui/icons-material/Upgrade';
-import { Stack } from '@mui/material';
+import { Stack, Button, Paper, Link, useTheme, useMediaQuery } from '@mui/material';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
+import InfoIcon from '@mui/icons-material/Info';
 import ModalComponent from './Modal';
 import { useState } from 'react';
 
@@ -17,13 +18,17 @@ export interface NavbarProps {
 }
 
 const Navbar: React.FC<NavbarProps> = ({backendState} : NavbarProps) => {
-  const [isModalOpen, setModalOpen] = useState(false);
+  const [isRestartModalOpen, setRestartModalOpen] = useState(false);
+  const [isAboutModalOpen, setAboutModalOpen] = useState(false);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-  const handleOpenModal = () => setModalOpen(true);
-  const handleCloseModal = () => setModalOpen(false);
+  const handleOpenRestartModal = () => setRestartModalOpen(true);
+  const handleCloseRestartModal = () => setRestartModalOpen(false);
+  const handleOpenAboutModal = () => setAboutModalOpen(true);
+  const handleCloseAboutModal = () => setAboutModalOpen(false);
   
   const handleSubmit = () => {
-
     fetch(`${apiEndpoint}/RST`, { mode: 'cors' })
       .then(response => {
         if (!response.ok) {
@@ -34,17 +39,39 @@ const Navbar: React.FC<NavbarProps> = ({backendState} : NavbarProps) => {
       .then(data => console.log(data))
       .catch(error => console.error('Error fetching data:', error));
 
-    handleCloseModal();
+    handleCloseRestartModal();
   };
-  
+
   return (
-    <Box sx={{ display: 'flex' }}>
-      <Stack direction='row' sx={{ position: {xs: 'static', md: 'absolute'}, left: '26%' }}>
-        <p style={{ color: 'black', alignSelf: 'left' }}>{backendState}</p>
+    <Box sx={{ 
+      display: 'flex', 
+      flexDirection: { xs: 'column', md: 'row' },
+      alignItems: 'center',
+      p: 2,
+      gap: 2,
+      borderBottom: 1,
+      borderColor: 'divider'
+    }}>
+      <Stack direction='row' sx={{ width: { xs: '100%', md: 'auto' }, justifyContent: { xs: 'center', md: 'flex-start' } }}>
+        <Paper 
+          elevation={0} 
+          sx={{ 
+            p: 1, 
+            display: 'flex', 
+            alignItems: 'center',
+            border: '1px solid',
+            borderColor: 'divider',
+            borderRadius: 1,
+            bgcolor: 'background.paper',
+            minWidth: '120px',
+            justifyContent: 'center'
+          }}
+        >
+          {backendState}
+        </Paper>
       </Stack>
 
-      <Stack direction='row' flex='1' justifyContent='center'>
-        <img src="https://vcc.earth/img/pony.webp" alt="friendship is magic" width="40" height="40" />
+      <Stack direction='row' flex='1' justifyContent='center' sx={{ width: { xs: '100%', md: 'auto' } }}>
         <Typography
           variant="h4"
           component="h1"
@@ -57,30 +84,91 @@ const Navbar: React.FC<NavbarProps> = ({backendState} : NavbarProps) => {
         >
           AntController
         </Typography>
-        <IconButton sx={{ p: 0 }} href="https://github.com/cr1tbit/antcontroller" target='_blank' rel="noopener noreferrer">
-          <GitHubIcon sx={{  color: 'success.main', fontSize: '2rem' }} />
-        </IconButton>
       </Stack>
 
-      <Stack direction="row" sx={{ position: {xs: 'static', md: 'absolute'}, right: '26%' }}>
-        <IconButton href="/edit"  target="_blank" title='edit config' sx={{ p: 0, '&:hover': { background: 'none' } }}>
-          <EditNoteIcon sx={{ fontSize: '2rem' }} />
-        </IconButton>
+      <Stack 
+        direction="row" 
+        sx={{ 
+          width: { xs: '100%', md: 'auto' },
+          justifyContent: { xs: 'center', md: 'flex-end' },
+          flexWrap: 'wrap',
+          gap: 1
+        }}
+      >
+        <Button 
+          onClick={handleOpenAboutModal}
+          variant="outlined" 
+          startIcon={<InfoIcon />}
+          size={isMobile ? "small" : "medium"}
+        >
+          About
+        </Button>
+
+        <Button 
+          href="/edit" 
+          target="_blank" 
+          variant="outlined" 
+          startIcon={<EditNoteIcon />}
+          size={isMobile ? "small" : "medium"}
+        >
+          Edit Config
+        </Button>
         
-        <IconButton onClick={handleOpenModal} title='restart device' sx={{ p: 0, ml: 1, '&:hover': { background: 'none' } }}>
-          <RestartAltIcon sx={{ fontSize: '1.7rem' }} />
-        </IconButton>
-        <IconButton href="https://vcc.earth/antcontroller"  target="_blank" title='update firmware' sx={{ p: 0, '&:hover': { background: 'none' } }}>
-          <UpgradeIcon sx={{ fontSize: '2rem' }} />
-        </IconButton>
+        <Button 
+          onClick={handleOpenRestartModal} 
+          variant="outlined" 
+          startIcon={<RestartAltIcon />}
+          size={isMobile ? "small" : "medium"}
+        >
+          Restart
+        </Button>
+        
+        <Button 
+          href="https://vcc.earth/antcontroller" 
+          target="_blank" 
+          variant="outlined" 
+          startIcon={<UpgradeIcon />}
+          size={isMobile ? "small" : "medium"}
+        >
+          Update
+        </Button>
       </Stack>
 
       <ModalComponent 
-        open={isModalOpen} 
+        open={isRestartModalOpen} 
         heading="Restart Device"
         subheading="Are you sure you want to restart the device?"
-        close={handleCloseModal} 
+        close={handleCloseRestartModal} 
         submit={handleSubmit}
+      />
+
+      <ModalComponent 
+        open={isAboutModalOpen} 
+        heading="About AntController"
+        subheading=""
+        close={handleCloseAboutModal} 
+        submit={handleCloseAboutModal}
+        content={
+          <Box sx={{ p: 2 }}>
+            <Typography variant="body1" paragraph>
+              AntController is a web-based interface for managing and monitoring your ant farm environment.
+              It provides real-time control over temperature, humidity, and other environmental factors
+              to create the perfect conditions for your ant colony.
+            </Typography>
+            <Typography variant="body1" paragraph>
+              For more information, visit our GitHub repository:
+            </Typography>
+            <Link 
+              href="https://github.com/cr1tbit/antcontroller" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              sx={{ display: 'flex', alignItems: 'center', gap: 1, textDecoration: 'none' }}
+            >
+              <GitHubIcon sx={{ color: 'success.main' }} />
+              <Typography>github.com/cr1tbit/antcontroller</Typography>
+            </Link>
+          </Box>
+        }
       />
     </Box> 
   )

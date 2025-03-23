@@ -7,9 +7,11 @@ interface ModalComponentProps {
     heading?: string;
     subheading?: string;
     submit: () => void;
+    content?: React.ReactNode;
 }
 
-const ModalComponent: React.FC<ModalComponentProps> = ({ open, close, heading, subheading, submit }) => {  return (
+const ModalComponent: React.FC<ModalComponentProps> = ({ open, close, heading, subheading, submit, content }) => {  
+  return (
     <Modal open={open} onClose={close}>
         <Box sx={{
             position: 'absolute',
@@ -34,12 +36,15 @@ const ModalComponent: React.FC<ModalComponentProps> = ({ open, close, heading, s
             {subheading && <Typography sx={{ my: 4 }}>
                 {subheading}
             </Typography>}
+            {content && <Box sx={{ my: 4 }}>
+                {content}
+            </Box>}
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', mt: 2 }}>
                 <Button variant="outlined" onClick={close}>Close</Button>
                 <Button variant="contained" onClick={submit}>Submit</Button>
             </Box>
         </Box>
-  </Modal>
+    </Modal>
   )
 }
 

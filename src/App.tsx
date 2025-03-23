@@ -181,8 +181,7 @@ const App = () => {
             <PinState pins={pinState} />
           </Grid>
         </Grid>
-      </Box>
-      <p>Backend state: {backendState}</p>
+      </Box>      
     </ThemeProvider>
   );
 };
