@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import { Box, Button, Divider, Typography } from '@mui/material';
@@ -40,6 +40,7 @@ const DeviceTable = ({devices} : DeviceStateProps) => {
   const [buttonGroups, setButtonGroups] = useState<ButtonGroupsType>({}); 
   const [isHolding, setIsHolding] = useState(false);
   const [heldButton, setHeldButton] = useState<{group: string, name: string} | null>(null);
+  const [debounceTimer, setDebounceTimer] = useState<NodeJS.Timeout | null>(null);
    
   const groupNames = ['a', 'b', 'c', 'd'];  
   
@@ -71,6 +72,38 @@ const DeviceTable = ({devices} : DeviceStateProps) => {
     setActiveButtons(devices);
   }, [devices]);
 
+  const debouncedActivate = useCallback(async (category: string, buttonName: string) => {
+    if (debounceTimer) {
+      clearTimeout(debounceTimer);
+    }
+    
+    const timer = setTimeout(async () => {
+      try {
+        await activateButton(category, buttonName);
+      } catch (error) {
+        console.error('Error activating button:', error);
+      }
+    }, 100);
+    
+    setDebounceTimer(timer);
+  }, [debounceTimer]);
+
+  const debouncedDeactivate = useCallback(async (category: string) => {
+    if (debounceTimer) {
+      clearTimeout(debounceTimer);
+    }
+    
+    const timer = setTimeout(async () => {
+      try {
+        await activateButton(category, 'OFF');
+      } catch (error) {
+        console.error('Error deactivating button:', error);
+      }
+    }, 100);
+    
+    setDebounceTimer(timer);
+  }, [debounceTimer]);
+
   const handleMouseDown = async (category: string, buttonName: string) => {
     if (category === 'd') {
       setIsHolding(true);
@@ -83,11 +116,7 @@ const DeviceTable = ({devices} : DeviceStateProps) => {
         }
       };
       setActiveButtons(newState);
-      try {
-        await activateButton(category, buttonName);
-      } catch (error) {
-        console.error('Error activating button:', error);
-      }
+      debouncedActivate(category, buttonName);
     } else {
       handleToggle(category, buttonName);
     }
@@ -104,11 +133,7 @@ const DeviceTable = ({devices} : DeviceStateProps) => {
         }
       };
       setActiveButtons(newState);
-      try {
-        await activateButton(heldButton.group, 'OFF');
-      } catch (error) {
-        console.error('Error deactivating button:', error);
-      }
+      debouncedDeactivate(heldButton.group);
       setHeldButton(null);
     }
   };
