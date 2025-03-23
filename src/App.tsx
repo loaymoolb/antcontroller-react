@@ -8,6 +8,13 @@ import PinState, {PinStateIface} from "./components/PinState";
 import DeviceTable, {DeviceStateIface} from "./components/DeviceTable";
 import theme from './theme';
 
+export enum BackendState {
+  UNKNOWN = 'unknown',
+  CONNECTED = 'connected',
+  DISCONNECTED = 'disconnected',
+  TIMEOUT = 'timeout'
+}
+
 const eventsEndpoint = `${process.env.REACT_APP_DEVICE_ADDR}/events`;
 
 export const JSON_EXAMPLE = `{
@@ -96,56 +103,74 @@ const App = () => {
     useState<DeviceStateIface>(() => buttonStateFromJSON(JSON_EXAMPLE));
 
   const [backendState, setBackendState] = 
-    useState<string>(() => "unknown");
+    useState<BackendState>(() => BackendState.UNKNOWN);
 
   useEffect(() => {
     let timeoutId: NodeJS.Timeout;
+    let reconnectTimeoutId: NodeJS.Timeout;
+    let sse: EventSource | null = null;
 
-    const sse = new EventSource(eventsEndpoint);
+    const connectSSE = () => {
+      if (sse) {
+        sse.close();
+      }
 
-    const setHeartbeatTimeout = () => {
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => {
-        console.log("No heartbeat event received for 5 seconds.");
-        // You can add your notification logic here
-        setBackendState("timeout");
-      }, 5 * 1000);
-    };
+      sse = new EventSource(eventsEndpoint);
 
-    function getRealtimeData(data: any) {
-        // console.log(`Connected!`);
-        // console.log(data);
+      const setHeartbeatTimeout = () => {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => {
+          console.log("No heartbeat event received for 5 seconds.");
+          setBackendState(BackendState.TIMEOUT);
+        }, 5 * 1000);
+      };
+
+      function getRealtimeData(data: any) {
         setLogs((prevLogs) => [...prevLogs, data]);
       } 
-    sse.onmessage = e => getRealtimeData(e.data);
-    sse.onerror = () => {
-      setBackendState("disconnected");
-    }
-    sse.onopen = () => {
-      // console.log("socket open");
-      setBackendState("connected");
-    }
-    sse.addEventListener('log', (e) => {
-      // console.log(e.data);
-      setLogs((prevLogs) => [...prevLogs, e.data]);
-    });
-    sse.addEventListener('state', (e) => {
-      // console.log("New state:");
-      try {
-        setPinState(pinStateFromJSON(e.data));
-        setDeviceState(buttonStateFromJSON(e.data));
-      } catch (error) {
-        console.log(error);
+
+      sse.onmessage = e => getRealtimeData(e.data);
+      sse.onerror = () => {
+        clearTimeout(timeoutId);
+        setBackendState(BackendState.DISCONNECTED);
+        // Attempt to reconnect after 3 seconds
+        clearTimeout(reconnectTimeoutId);
+        reconnectTimeoutId = setTimeout(() => {
+          console.log("Attempting to reconnect SSE...");
+          connectSSE();
+        }, 3000);
       }
-    });    
-    sse.addEventListener('heartbeat', (e) => {
-      setHeartbeatTimeout();
-      // console.log("dokidoki");
-    });
+      sse.onopen = () => {
+        setBackendState(BackendState.CONNECTED);
+        // Set initial timeout when connection is established
+        setHeartbeatTimeout();
+      }
+      sse.addEventListener('log', (e) => {
+        setLogs((prevLogs) => [...prevLogs, e.data]);
+      });
+      sse.addEventListener('state', (e) => {
+        try {
+          setPinState(pinStateFromJSON(e.data));
+          setDeviceState(buttonStateFromJSON(e.data));
+        } catch (error) {
+          console.log(error);
+        }
+      });    
+      sse.addEventListener('heartbeat', (e) => {
+        setHeartbeatTimeout();
+        setBackendState(BackendState.CONNECTED);
+      });
+    };
+
+    // Initial connection
+    connectSSE();
 
     return () => {
-      clearTimeout(timeoutId); // Clear the timeout if the component unmounts
-      sse.close();
+      clearTimeout(timeoutId);
+      clearTimeout(reconnectTimeoutId);
+      if (sse) {
+        sse.close();
+      }
     };
   }, []);
 

@@ -2,26 +2,71 @@ import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import GitHubIcon from '@mui/icons-material/GitHub';
-import EditIcon from '@mui/icons-material/Edit';
 import EditNoteIcon from '@mui/icons-material/EditNote';
 import UpgradeIcon from '@mui/icons-material/Upgrade';
 import { Stack, Button, Paper, Link, useTheme, useMediaQuery } from '@mui/material';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import InfoIcon from '@mui/icons-material/Info';
 import ModalComponent from './Modal';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { BackendState } from '../App';
 
 const apiEndpoint = `${process.env.REACT_APP_DEVICE_ADDR}/api`;
 
 export interface NavbarProps {
-  backendState: string;
+  backendState: BackendState;
 }
+
+const getStateColor = (state: BackendState) => {
+  switch (state) {
+    case BackendState.CONNECTED:
+      return 'success.main';
+    case BackendState.DISCONNECTED:
+      return 'error.main';
+    case BackendState.TIMEOUT:
+      return 'warning.main';
+    default:
+      return 'grey.500';
+  }
+};
+
+const getStateText = (state: BackendState, timeoutSeconds?: number) => {
+  switch (state) {
+    case BackendState.CONNECTED:
+      return 'Connected';
+    case BackendState.DISCONNECTED:
+      return 'Disconnected';
+    case BackendState.TIMEOUT:
+      return `Timeout (${timeoutSeconds}s)`;
+    default:
+      return 'Unknown';
+  }
+};
 
 const Navbar: React.FC<NavbarProps> = ({backendState} : NavbarProps) => {
   const [isRestartModalOpen, setRestartModalOpen] = useState(false);
   const [isAboutModalOpen, setAboutModalOpen] = useState(false);
+  const [timeoutSeconds, setTimeoutSeconds] = useState(0);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout;
+    
+    if (backendState === BackendState.TIMEOUT) {
+      intervalId = setInterval(() => {
+        setTimeoutSeconds(prev => prev + 1);
+      }, 1000);
+    } else {
+      setTimeoutSeconds(0);
+    }
+
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [backendState]);
 
   const handleOpenRestartModal = () => setRestartModalOpen(true);
   const handleCloseRestartModal = () => setRestartModalOpen(false);
@@ -53,22 +98,30 @@ const Navbar: React.FC<NavbarProps> = ({backendState} : NavbarProps) => {
       borderColor: 'divider'
     }}>
       <Stack direction='row' sx={{ width: { xs: '100%', md: 'auto' }, justifyContent: { xs: 'center', md: 'flex-start' } }}>
-        <Paper 
-          elevation={0} 
+        <Button
+          variant="outlined"
+          size={isMobile ? "small" : "medium"}
+          onClick={handleOpenAboutModal}
           sx={{ 
-            p: 1, 
-            display: 'flex', 
-            alignItems: 'center',
-            border: '1px solid',
-            borderColor: 'divider',
-            borderRadius: 1,
-            bgcolor: 'background.paper',
             minWidth: '120px',
-            justifyContent: 'center'
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            textTransform: 'none',
+            color: 'text.primary'
           }}
         >
-          {backendState}
-        </Paper>
+          <Box
+            sx={{
+              width: 8,
+              height: 8,
+              borderRadius: '50%',
+              bgcolor: getStateColor(backendState),
+              transition: 'background-color 0.2s'
+            }}
+          />
+          {getStateText(backendState, timeoutSeconds)}
+        </Button>
       </Stack>
 
       <Stack direction='row' flex='1' justifyContent='center' sx={{ width: { xs: '100%', md: 'auto' } }}>
@@ -95,15 +148,6 @@ const Navbar: React.FC<NavbarProps> = ({backendState} : NavbarProps) => {
           gap: 1
         }}
       >
-        <Button 
-          onClick={handleOpenAboutModal}
-          variant="outlined" 
-          startIcon={<InfoIcon />}
-          size={isMobile ? "small" : "medium"}
-        >
-          About
-        </Button>
-
         <Button 
           href="/edit" 
           target="_blank" 
