@@ -20,10 +20,10 @@ export interface DeviceStateIface {
 }
 
 type ButtonGroupsType = Record<string, IButton[]>;
+
 export function activateButton(bGroup: string, bName: string): Promise<boolean> {
   console.log(`activating ${bGroup} to ${bName}`);
   let fetchCall = `${apiEndpoint}/BUT/${bGroup}/${bName}`
-  // console.log(fetchCall)
   return fetch(fetchCall, {mode: 'cors'})
     .then(function(response) {
       return response.text();
@@ -38,6 +38,8 @@ type DeviceStateProps = {devices: DeviceStateIface};
 
 const DeviceTable = ({devices} : DeviceStateProps) => {
   const [buttonGroups, setButtonGroups] = useState<ButtonGroupsType>({}); 
+  const [isHolding, setIsHolding] = useState(false);
+  const [heldButton, setHeldButton] = useState<{group: string, name: string} | null>(null);
    
   const groupNames = ['a', 'b', 'c', 'd'];  
   
@@ -67,10 +69,49 @@ const DeviceTable = ({devices} : DeviceStateProps) => {
 
   useEffect(() => {
     setActiveButtons(devices);
-    // console.log('devicesToUpdate', devices.a);
   }, [devices]);
 
-  console.log('buttonGroups', buttonGroups); 
+  const handleMouseDown = async (category: string, buttonName: string) => {
+    if (category === 'd') {
+      setIsHolding(true);
+      setHeldButton({ group: category, name: buttonName });
+      const newState = {
+        ...activeButtons,
+        [category]: {
+          currentButton: buttonName,
+          confirmed: false
+        }
+      };
+      setActiveButtons(newState);
+      try {
+        await activateButton(category, buttonName);
+      } catch (error) {
+        console.error('Error activating button:', error);
+      }
+    } else {
+      handleToggle(category, buttonName);
+    }
+  };
+
+  const handleMouseUp = async () => {
+    if (isHolding && heldButton) {
+      setIsHolding(false);
+      const newState = {
+        ...activeButtons,
+        [heldButton.group]: {
+          currentButton: 'OFF',
+          confirmed: false
+        }
+      };
+      setActiveButtons(newState);
+      try {
+        await activateButton(heldButton.group, 'OFF');
+      } catch (error) {
+        console.error('Error deactivating button:', error);
+      }
+      setHeldButton(null);
+    }
+  };
 
   const handleToggle = async (category: string, buttonName: string) => {
     const isActive = activeButtons[category].currentButton === buttonName;
@@ -131,7 +172,15 @@ const DeviceTable = ({devices} : DeviceStateProps) => {
               <ListItem key={button.name} sx={{ flex: { xs: '100%', sm: '33%', md: '25%' }, maxWidth: { xs: '50%', sm: '33%', md: '25%' }, p: { xs: 0.5, md: 1 } }}>
                 <Button 
                   variant="outlined"
-                  onClick={() => handleToggle(groupName, button.name)}
+                  {...(groupName === 'd' ? {
+                    onMouseDown: () => handleMouseDown(groupName, button.name),
+                    onMouseUp: handleMouseUp,
+                    onMouseLeave: handleMouseUp,
+                    onTouchStart: () => handleMouseDown(groupName, button.name),
+                    onTouchEnd: handleMouseUp,
+                  } : {
+                    onClick: () => handleToggle(groupName, button.name)
+                  })}
                   sx={getButtonStyles(groupName, button.name)}
                 >
                   <Box>
